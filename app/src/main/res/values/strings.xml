@@ -6,4 +6,6 @@
     <string name="placeholder_qty">Qty: 2.0 pcs</string>
     <string name="placeholder_expiry">Expires: 2026–10–01</string>
     <string name="btn_delete">Delete</string>
+    <string name="format_quantity">Qty: %1$.1f %2$s</string>
+    <string name="format_expiry">Expires: %1$s</string>
 </resources>
