@@ -14,12 +14,12 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
     private List<PantryItem> itemList;
     private final OnItemDeleteListener deleteListener;
 
-    // Interface to handle delete button clicks in MainActivity
+
     public interface OnItemDeleteListener {
         void onDeleteClick(PantryItem item);
     }
 
-    // Constructor
+
     public PantryAdapter(List<PantryItem> itemList, OnItemDeleteListener deleteListener) {
         this.itemList = itemList;
         this.deleteListener = deleteListener;
@@ -39,7 +39,6 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
 
         holder.tvName.setText(item.getName());
 
-        // Use string resources with placeholders to satisfy linter and support localization
         String qtyText = holder.itemView.getContext().getString(
                 R.string.format_quantity, item.getQuantity(), item.getUnit());
         holder.tvQty.setText(qtyText);
@@ -48,7 +47,6 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
                 R.string.format_expiry, item.getExpiryDate());
         holder.tvExpiry.setText(expiryText);
 
-        // Handle delete button click
         holder.btnDelete.setOnClickListener(v -> {
             if (deleteListener != null) {
                 deleteListener.onDeleteClick(item);
@@ -61,14 +59,12 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
         return itemList != null ? itemList.size() : 0;
     }
 
-    // Update list dynamically when database changes
     @SuppressWarnings("NotifyDataSetChanged")
     public void updateList(List<PantryItem> newList) {
         this.itemList = newList;
         notifyDataSetChanged();
     }
 
-    // ViewHolder class to hold references to item views
     public static class PantryViewHolder extends RecyclerView.ViewHolder {
         TextView tvName, tvQty, tvExpiry;
         Button btnDelete;

@@ -33,7 +33,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        // Create Pantry Table
         String createPantry = "CREATE TABLE " + TABLE_PANTRY + " (" +
                 COLUMN_PANTRY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_PANTRY_NAME + " TEXT, " +
@@ -42,7 +41,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_PANTRY_EXPIRY + " TEXT)";
         db.execSQL(createPantry);
 
-        // Create Recipes Table
         String createRecipes = "CREATE TABLE " + TABLE_RECIPES + " (" +
                 COLUMN_RECIPE_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_RECIPE_NAME + " TEXT, " +
@@ -60,7 +58,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Add new pantry item
     public boolean addPantryItem(String name, double quantity, String unit, String expiryDate) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -73,7 +70,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return result != -1;
     }
 
-    // Fetch all pantry items as a List<PantryItem> for RecyclerView
     public List<PantryItem> getAllPantryItems() {
         List<PantryItem> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -94,7 +90,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return itemList;
     }
 
-    // Update existing pantry item
     public boolean updatePantryItem(int id, String name, double quantity, String unit, String expiryDate) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -107,15 +102,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rows > 0;
     }
 
-    // Delete pantry item
     public boolean deletePantryItem(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
         int rows = db.delete(TABLE_PANTRY, COLUMN_PANTRY_ID + "=?", new String[]{String.valueOf(id)});
         return rows > 0;
     }
 
-    // Recipe suggestion helper logic
-    public Cursor getSuggestedRecipes() {
+    public List<Recipe> getSuggestedRecipes() {
+        List<Recipe> recipeList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         List<Integer> matchingRecipeIds = new ArrayList<>();
 
@@ -134,7 +128,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         recipeCursor.close();
 
         if (matchingRecipeIds.isEmpty()) {
-            return null;
+            return recipeList;
         }
 
         StringBuilder query = new StringBuilder("SELECT * FROM " + TABLE_RECIPES + " WHERE " + COLUMN_RECIPE_ID + " IN (");
@@ -146,7 +140,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         query.append(")");
 
-        return db.rawQuery(query.toString(), null);
+        Cursor resultCursor = db.rawQuery(query.toString(), null);
+        if (resultCursor.moveToFirst()) {
+            do {
+                int id = resultCursor.getInt(resultCursor.getColumnIndexOrThrow(COLUMN_RECIPE_ID));
+                String name = resultCursor.getString(resultCursor.getColumnIndexOrThrow(COLUMN_RECIPE_NAME));
+                String ingredients = resultCursor.getString(resultCursor.getColumnIndexOrThrow(COLUMN_RECIPE_INGREDIENTS));
+                String instructions = resultCursor.getString(resultCursor.getColumnIndexOrThrow(COLUMN_RECIPE_INSTRUCTIONS));
+
+                recipeList.add(new Recipe(id, name, ingredients, instructions));
+            } while (resultCursor.moveToNext());
+        }
+        resultCursor.close();
+
+        return recipeList;
     }
 
     private boolean canMakeRecipe(String ingredientsNeeded) {

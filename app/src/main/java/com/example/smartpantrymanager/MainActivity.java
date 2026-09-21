@@ -1,5 +1,6 @@
 package com.example.smartpantrymanager;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
@@ -19,20 +20,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize Database Helper
         dbHelper = new DatabaseHelper(this);
 
-        // Initialize Views
         RecyclerView rvPantry = findViewById(R.id.rvPantry);
         Button btnAddItem = findViewById(R.id.btnAddItem);
 
-        // Configure RecyclerView
         rvPantry.setLayoutManager(new LinearLayoutManager(this));
 
-        // Load data from database
         pantryList = dbHelper.getAllPantryItems();
 
-        // Initialize Adapter with item click/delete listener
         adapter = new PantryAdapter(pantryList, item -> {
             boolean deleted = dbHelper.deletePantryItem(item.getId());
             if (deleted) {
@@ -45,13 +41,24 @@ public class MainActivity extends AppCompatActivity {
 
         rvPantry.setAdapter(adapter);
 
-        // Placeholder click listener for Add button
-        btnAddItem.setOnClickListener(v ->
-                Toast.makeText(MainActivity.this, "Add Item feature coming next!", Toast.LENGTH_SHORT).show()
-        );
+        btnAddItem.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, AddEditItemActivity.class);
+            startActivity(intent);
+        });
+        Button btnSuggestRecipes = findViewById(R.id.btnSuggestRecipes);
+
+        btnSuggestRecipes.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, RecipeActivity.class);
+            startActivity(intent);
+        });
     }
 
-    // Helper method to reload data from SQLite database
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadPantryData();
+    }
+
     private void loadPantryData() {
         pantryList = dbHelper.getAllPantryItems();
         adapter.updateList(pantryList);
