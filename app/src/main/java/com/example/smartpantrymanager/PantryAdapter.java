@@ -11,18 +11,22 @@ import java.util.List;
 
 public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryViewHolder> {
 
-    private List<PantryItem> itemList;
-    private final OnItemDeleteListener deleteListener;
+    public interface OnItemClickListener {
+        void onItemClick(PantryItem item);
+    }
 
-
-    public interface OnItemDeleteListener {
+    public interface OnDeleteClickListener {
         void onDeleteClick(PantryItem item);
     }
 
+    private List<PantryItem> pantryList;
+    private final OnItemClickListener itemClickListener;
+    private final OnDeleteClickListener deleteClickListener;
 
-    public PantryAdapter(List<PantryItem> itemList, OnItemDeleteListener deleteListener) {
-        this.itemList = itemList;
-        this.deleteListener = deleteListener;
+    public PantryAdapter(List<PantryItem> pantryList, OnItemClickListener itemClickListener, OnDeleteClickListener deleteClickListener) {
+        this.pantryList = pantryList;
+        this.itemClickListener = itemClickListener;
+        this.deleteClickListener = deleteClickListener;
     }
 
     @NonNull
@@ -35,44 +39,41 @@ public class PantryAdapter extends RecyclerView.Adapter<PantryAdapter.PantryView
 
     @Override
     public void onBindViewHolder(@NonNull PantryViewHolder holder, int position) {
-        PantryItem item = itemList.get(position);
+        PantryItem item = pantryList.get(position);
 
         holder.tvName.setText(item.getName());
 
         String qtyText = holder.itemView.getContext().getString(
                 R.string.format_quantity, item.getQuantity(), item.getUnit());
-        holder.tvQty.setText(qtyText);
+        holder.tvQuantity.setText(qtyText);
 
         String expiryText = holder.itemView.getContext().getString(
                 R.string.format_expiry, item.getExpiryDate());
         holder.tvExpiry.setText(expiryText);
 
-        holder.btnDelete.setOnClickListener(v -> {
-            if (deleteListener != null) {
-                deleteListener.onDeleteClick(item);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> itemClickListener.onItemClick(item));
+
+        holder.btnDelete.setOnClickListener(v -> deleteClickListener.onDeleteClick(item));
     }
 
     @Override
     public int getItemCount() {
-        return itemList != null ? itemList.size() : 0;
+        return pantryList != null ? pantryList.size() : 0;
     }
 
-    @SuppressWarnings("NotifyDataSetChanged")
     public void updateList(List<PantryItem> newList) {
-        this.itemList = newList;
+        this.pantryList = newList;
         notifyDataSetChanged();
     }
 
     public static class PantryViewHolder extends RecyclerView.ViewHolder {
-        TextView tvName, tvQty, tvExpiry;
+        TextView tvName, tvQuantity, tvExpiry;
         Button btnDelete;
 
         public PantryViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tvItemName);
-            tvQty = itemView.findViewById(R.id.tvItemQty);
+            tvQuantity = itemView.findViewById(R.id.tvItemQty);
             tvExpiry = itemView.findViewById(R.id.tvItemExpiry);
             btnDelete = itemView.findViewById(R.id.btnDelete);
         }

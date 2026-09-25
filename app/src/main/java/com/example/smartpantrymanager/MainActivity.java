@@ -24,20 +24,33 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerView rvPantry = findViewById(R.id.rvPantry);
         Button btnAddItem = findViewById(R.id.btnAddItem);
+        Button btnSuggestRecipes = findViewById(R.id.btnSuggestRecipes);
 
         rvPantry.setLayoutManager(new LinearLayoutManager(this));
 
         pantryList = dbHelper.getAllPantryItems();
 
-        adapter = new PantryAdapter(pantryList, item -> {
-            boolean deleted = dbHelper.deletePantryItem(item.getId());
-            if (deleted) {
-                Toast.makeText(MainActivity.this, item.getName() + " removed", Toast.LENGTH_SHORT).show();
-                loadPantryData(); // Refresh list display
-            } else {
-                Toast.makeText(MainActivity.this, "Failed to delete item", Toast.LENGTH_SHORT).show();
-            }
-        });
+        adapter = new PantryAdapter(
+                pantryList,
+                item -> {
+                    Intent intent = new Intent(MainActivity.this, AddEditItemActivity.class);
+                    intent.putExtra("ITEM_ID", item.getId());
+                    intent.putExtra("ITEM_NAME", item.getName());
+                    intent.putExtra("ITEM_QTY", item.getQuantity());
+                    intent.putExtra("ITEM_UNIT", item.getUnit());
+                    intent.putExtra("ITEM_EXPIRY", item.getExpiryDate());
+                    startActivity(intent);
+                },
+                item -> {
+                    boolean deleted = dbHelper.deletePantryItem(item.getId());
+                    if (deleted) {
+                        Toast.makeText(MainActivity.this, item.getName() + " removed", Toast.LENGTH_SHORT).show();
+                        loadPantryData();
+                    } else {
+                        Toast.makeText(MainActivity.this, "Failed to delete item", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
 
         rvPantry.setAdapter(adapter);
 
@@ -45,7 +58,6 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, AddEditItemActivity.class);
             startActivity(intent);
         });
-        Button btnSuggestRecipes = findViewById(R.id.btnSuggestRecipes);
 
         btnSuggestRecipes.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, RecipeActivity.class);

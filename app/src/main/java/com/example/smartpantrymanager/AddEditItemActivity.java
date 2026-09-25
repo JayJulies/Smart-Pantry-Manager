@@ -1,9 +1,10 @@
 package com.example.smartpantrymanager;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -11,6 +12,7 @@ public class AddEditItemActivity extends AppCompatActivity {
 
     private EditText etName, etQuantity, etUnit, etExpiry;
     private DatabaseHelper dbHelper;
+    private int itemId = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,11 +21,25 @@ public class AddEditItemActivity extends AppCompatActivity {
 
         dbHelper = new DatabaseHelper(this);
 
+        TextView tvTitle = findViewById(R.id.tvHeader);
         etName = findViewById(R.id.etName);
         etQuantity = findViewById(R.id.etQuantity);
         etUnit = findViewById(R.id.etUnit);
         etExpiry = findViewById(R.id.etExpiry);
         Button btnSave = findViewById(R.id.btnSave);
+
+        Intent intent = getIntent();
+        if (intent.hasExtra("ITEM_ID")) {
+            itemId = intent.getIntExtra("ITEM_ID", -1);
+            etName.setText(intent.getStringExtra("ITEM_NAME"));
+            etQuantity.setText(String.valueOf(intent.getDoubleExtra("ITEM_QTY", 0)));
+            etUnit.setText(intent.getStringExtra("ITEM_UNIT"));
+            etExpiry.setText(intent.getStringExtra("ITEM_EXPIRY"));
+
+            if (tvTitle != null) {
+                tvTitle.setText("Edit Ingredient");
+            }
+        }
 
         btnSave.setOnClickListener(v -> saveItem());
     }
@@ -34,19 +50,31 @@ public class AddEditItemActivity extends AppCompatActivity {
         String unit = etUnit.getText().toString().trim();
         String expiry = etExpiry.getText().toString().trim();
 
-        if (TextUtils.isEmpty(name) || TextUtils.isEmpty(qtyStr) || TextUtils.isEmpty(unit)) {
-            Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
+        if (name.isEmpty() || qtyStr.isEmpty() || unit.isEmpty() || expiry.isEmpty()) {
+            Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        double quantity = Double.parseDouble(qtyStr);
-        boolean inserted = dbHelper.addPantryItem(name, quantity, unit, expiry);
+        double quantity;
+        try {
+            quantity = Double.parseDouble(qtyStr);
+        } catch (NumberFormatException e) {
+            Toast.makeText(this, "Invalid quantity format", Toast.LENGTH_SHORT).show();
+            return;
+        }
 
-        if (inserted) {
-            Toast.makeText(this, "Ingredient saved!", Toast.LENGTH_SHORT).show();
+        boolean success;
+        if (itemId == -1) {
+            success = dbHelper.addPantryItem(name, quantity, unit, expiry);
+        } else {
+            success = dbHelper.updatePantryItem(itemId, name, quantity, unit, expiry);
+        }
+
+        if (success) {
+            Toast.makeText(this, itemId == -1 ? "Item added" : "Item updated", Toast.LENGTH_SHORT).show();
             finish();
         } else {
-            Toast.makeText(this, "Error saving ingredient", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Operation failed", Toast.LENGTH_SHORT).show();
         }
     }
 }
