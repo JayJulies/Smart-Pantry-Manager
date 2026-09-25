@@ -4,7 +4,7 @@
     <string name="btn_add_ingredient">Add New Ingredient</string>
     <string name="placeholder_ingredient_name">Ingredient Name</string>
     <string name="placeholder_qty">Qty: 2.0 pcs</string>
-    <string name="placeholder_expiry">Expires: 2026–10–01</string>
+    <string name="placeholder_expiry">Expires: 2026-10-01</string>
     <string name="btn_delete">Delete</string>
     <string name="format_quantity">Qty: %1$.1f %2$s</string>
     <string name="format_expiry">Expires: %1$s</string>
@@ -12,10 +12,14 @@
     <string name="hint_name">Ingredient Name (e.g., Egg)</string>
     <string name="hint_quantity">Quantity (e.g., 2.0)</string>
     <string name="hint_unit">Unit (e.g., pcs, kg, milk)</string>
-    <string name="hint_expiry">Expiry Date (YYYY–MM–DD)</string>
+    <string name="hint_expiry">Expiry Date (YYYY-MM-DD)</string>
     <string name="btn_save">Save Ingredient</string>
     <string name="title_suggested_recipes">Suggested Recipes</string>
     <string name="btn_suggest_recipes">Suggest Recipes</string>
     <string name="format_ingredients">Ingredients: %1$s</string>
     <string name="format_instructions">Instructions: %1$s</string>
+    <string name="title_settings">Settings &amp; Preferences</string>
+    <string name="label_expiring_alerts">Enable Expiring-Soon Alerts</string>
+    <string name="label_metric_units">Use Metric Units (kg, g, ml)</string>
+    <string name="label_app_version">App Version: 1.0.0</string>
 </resources>

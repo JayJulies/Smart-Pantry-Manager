@@ -1,5 +1,7 @@
 package com.example.smartpantrymanager;
 
+import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,16 +29,19 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeView
     @Override
     public void onBindViewHolder(@NonNull RecipeViewHolder holder, int position) {
         Recipe recipe = recipeList.get(position);
+        Context context = holder.itemView.getContext();
 
         holder.tvName.setText(recipe.getName());
+        holder.tvIngredients.setText(context.getString(R.string.format_ingredients, recipe.getIngredients()));
+        holder.tvInstructions.setText(context.getString(R.string.format_instructions, recipe.getInstructions()));
 
-        String ingredientsText = holder.itemView.getContext().getString(
-                R.string.format_ingredients, recipe.getIngredients());
-        holder.tvIngredients.setText(ingredientsText);
-
-        String instructionsText = holder.itemView.getContext().getString(
-                R.string.format_instructions, recipe.getInstructions());
-        holder.tvInstructions.setText(instructionsText);
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, RecipeDetailActivity.class);
+            intent.putExtra("RECIPE_NAME", recipe.getName());
+            intent.putExtra("RECIPE_INGREDIENTS", recipe.getIngredients());
+            intent.putExtra("RECIPE_INSTRUCTIONS", recipe.getInstructions());
+            context.startActivity(intent);
+        });
     }
 
     @Override
