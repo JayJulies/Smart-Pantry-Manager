@@ -30,7 +30,8 @@
             android:exported="false" />
         <activity
             android:name=".RecipeDetailActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:parentActivityName=".RecipeActivity" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false" />

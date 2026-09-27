@@ -5,8 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -19,7 +22,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COLUMN_PANTRY_QTY = "quantity";
     public static final String COLUMN_PANTRY_UNIT = "unit";
     public static final String COLUMN_PANTRY_EXPIRY = "expiry_date";
-
 
     public static final String TABLE_RECIPES = "recipes";
     public static final String COLUMN_RECIPE_ID = "id";
@@ -86,6 +88,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.insert(TABLE_RECIPES, null, values);
     }
 
+    private String normalizeName(String name) {
+        if (name == null) return "";
+        String clean = name.trim().toLowerCase();
+        if (clean.endsWith("es") && clean.length() > 3) {
+            return clean.substring(0, clean.length() - 2);
+        } else if (clean.endsWith("s") && !clean.endsWith("ss") && clean.length() > 3) {
+            return clean.substring(0, clean.length() - 1);
+        }
+        return clean;
+    }
 
     public boolean addPantryItem(String name, double quantity, String unit, String expiryDate) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -161,49 +173,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<PantryItem> pantryItems = getAllPantryItems();
         List<Recipe> matchingRecipes = new ArrayList<>();
 
+        Map<String, Double> pantryTotals = new HashMap<>();
+        for (PantryItem item : pantryItems) {
+            if (item != null && item.getName() != null) {
+                String cleanName = normalizeName(item.getName());
+                Double existingTotal = pantryTotals.get(cleanName);
+                double currentTotal = (existingTotal != null) ? existingTotal : 0.0;
+                pantryTotals.put(cleanName, currentTotal + item.getQuantity());
+            }
+        }
+
         for (Recipe recipe : allRecipes) {
             String ingredientsStr = recipe.getIngredients();
-            if (ingredientsStr == null || ingredientsStr.isEmpty()) {
-                continue;
-            }
+            if (ingredientsStr == null || ingredientsStr.isEmpty()) continue;
 
             String[] requiredList = ingredientsStr.split(",");
-            boolean recipeCanBeMade = true;
+            int matchedIngredients = 0;
+            int totalIngredients = requiredList.length;
 
             for (String reqItem : requiredList) {
                 String[] parts = reqItem.trim().split(":");
-                if (parts.length < 2) {
-                    recipeCanBeMade = false;
-                    break;
-                }
+                if (parts.length < 2) continue;
 
-                String reqName = parts[0].trim();
-                double reqQty = 0;
+                String reqName = normalizeName(parts[0]);
+                double reqQty;
                 try {
                     reqQty = Double.parseDouble(parts[1].trim());
                 } catch (NumberFormatException e) {
-                    recipeCanBeMade = false;
-                    break;
+                    continue;
                 }
 
+                Double totalInPantry = pantryTotals.get(reqName);
+                double availableQty = (totalInPantry != null) ? totalInPantry : 0.0;
 
-                boolean ingredientFound = false;
-                for (PantryItem pantry : pantryItems) {
-                    if (pantry.getName().equalsIgnoreCase(reqName)) {
-                        if (pantry.getQuantity() >= reqQty) {
-                            ingredientFound = true;
-                        }
-                        break;
-                    }
-                }
-
-                if (!ingredientFound) {
-                    recipeCanBeMade = false;
-                    break;
+                if (availableQty >= reqQty) {
+                    matchedIngredients++;
                 }
             }
 
-            if (recipeCanBeMade) {
+            if (matchedIngredients == totalIngredients) {
                 matchingRecipes.add(recipe);
             }
         }

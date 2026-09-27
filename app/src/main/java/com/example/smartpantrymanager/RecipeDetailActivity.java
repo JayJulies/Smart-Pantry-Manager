@@ -38,4 +38,21 @@ public class RecipeDetailActivity extends AppCompatActivity {
             if (instructions != null) tvInstructions.setText(instructions);
         }
     }
+    public String getFormattedIngredients(String rawIngredients) {
+        if (rawIngredients == null) return "";
+        StringBuilder builder = new StringBuilder();
+        String[] items = rawIngredients.split(",");
+        for (String item : items) {
+            String[] parts = item.trim().split(":");
+            if (parts.length >= 3) {
+                builder.append("• ").append(parts[0]).append(" (").append(parts[1]).append(" ").append(parts[2]).append(")\n");
+            } else if (parts.length == 2) {
+                builder.append("• ").append(parts[0]).append(" (").append(parts[1]).append(")\n");
+            } else {
+                builder.append("• ").append(item.trim()).append("\n");
+            }
+        }
+        return builder.toString().trim();
+    }
 }
+
