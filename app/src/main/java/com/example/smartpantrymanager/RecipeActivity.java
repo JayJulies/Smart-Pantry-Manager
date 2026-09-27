@@ -11,6 +11,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import android.widget.TextView;
+import android.view.View;
 
 public class RecipeActivity extends AppCompatActivity {
 
@@ -27,14 +29,21 @@ public class RecipeActivity extends AppCompatActivity {
             }
         }
 
-        DatabaseHelper dbHelper = new DatabaseHelper(this);
         RecyclerView rvRecipes = findViewById(R.id.rvRecipes);
+        TextView tvEmptyRecipes = findViewById(R.id.tvEmptyRecipes);
         rvRecipes.setLayoutManager(new LinearLayoutManager(this));
 
-        List<Recipe> suggestedRecipes = dbHelper.getSuggestedRecipes();
+        List<Recipe> suggestedRecipes;
+        try (DatabaseHelper dbHelper = new DatabaseHelper(this)) {
+            suggestedRecipes = dbHelper.getSuggestedRecipes();
+        }
 
         if (suggestedRecipes.isEmpty()) {
-            Toast.makeText(this, "No recipes found matching your pantry ingredients.", Toast.LENGTH_LONG).show();
+            if (tvEmptyRecipes != null) tvEmptyRecipes.setVisibility(View.VISIBLE);
+            rvRecipes.setVisibility(View.GONE);
+        } else {
+            if (tvEmptyRecipes != null) tvEmptyRecipes.setVisibility(View.GONE);
+            rvRecipes.setVisibility(View.VISIBLE);
         }
 
         RecipeAdapter adapter = new RecipeAdapter(suggestedRecipes);

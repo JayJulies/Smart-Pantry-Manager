@@ -12,17 +12,23 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
+import android.widget.TextView;
+import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
     private PantryAdapter adapter;
     private List<PantryItem> pantryList;
+    private TextView tvEmptyPantry;
+    private RecyclerView rvPantry;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        tvEmptyPantry = findViewById(R.id.tvEmptyPantry);
+        rvPantry = findViewById(R.id.rvPantry);
 
         Toolbar toolbar = findViewById(R.id.toolbarMain);
         if (toolbar != null) {
@@ -95,6 +101,14 @@ public class MainActivity extends AppCompatActivity {
         if (dbHelper != null && adapter != null) {
             pantryList = dbHelper.getAllPantryItems();
             adapter.updateList(pantryList);
+
+            if (pantryList.isEmpty()) {
+                if (tvEmptyPantry != null) tvEmptyPantry.setVisibility(View.VISIBLE);
+                if (rvPantry != null) rvPantry.setVisibility(View.GONE);
+            } else {
+                if (tvEmptyPantry != null) tvEmptyPantry.setVisibility(View.GONE);
+                if (rvPantry != null) rvPantry.setVisibility(View.VISIBLE);
+            }
         }
     }
 

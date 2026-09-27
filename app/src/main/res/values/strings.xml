@@ -22,4 +22,6 @@
     <string name="label_expiring_alerts">Enable Expiring-Soon Alerts</string>
     <string name="label_metric_units">Use Metric Units (kg, g, ml)</string>
     <string name="label_app_version">App Version: 1.0.0</string>
+    <string name="empty_pantry_message">Your pantry is empty!\nTap \'Add New Ingredient\' to get started.</string>
+    <string name="empty_recipe_message">No matching recipes found.\nTry adding more ingredients to your pantry!</string>
 </resources>
